@@ -1,50 +1,53 @@
 # code-server Viewer Skill
 
-Spin up an ephemeral VS Code-in-browser instance (code-server) to view agent-generated files — markdown reports, code, HTML output — with a full file tree, syntax highlighting, and live markdown preview.
+An OpenCode skill that spins up [code-server](https://github.com/coder/code-server) — VS Code running in your browser — so you can instantly browse agent-generated files without leaving your workflow.
 
-## Overview
+## What it does
 
-This skill gives any OpenCode agent a reliable, zero-configuration recipe for spinning up code-server as a local file viewer. The server runs on `127.0.0.1` only (no network exposure), requires no authentication, and auto-shuts down after 1 hour of idle time.
+When an agent generates files (reports, code, HTML, data), you can ask it to "show me what you created" and it will:
 
-## Features
+1. Find a free local port (13337–13399)
+2. Start code-server in a background tmux session
+3. Wait for it to be ready (healthz polling)
+4. Auto-open your browser to the correct URL
 
-- **Auto port selection**: Finds a free port in range 13337–13399
-- **Healthz polling**: Waits for server ready before opening browser
-- **Auto browser open**: macOS `open` command launches the correct URL
-- **tmux lifecycle**: Named sessions (`cs-PORT`) for easy management
-- **Idle timeout**: `--idle-timeout-seconds 3600` kills forgotten instances
-- **Status/stop/cleanup**: Full lifecycle recipes included
+You get a full VS Code experience — file tree, syntax highlighting, live markdown preview, and an integrated terminal — pointed at whatever directory the agent was working in.
 
 ## Requirements
 
-- macOS (uses `open` command for browser)
-- [code-server](https://github.com/coder/code-server) — install via `brew install code-server`
+- macOS
+- [code-server](https://github.com/coder/code-server) — `brew install code-server`
 - tmux
 
-## Installation
+## Trigger phrases
 
-```bash
-brew install code-server
-# Binary: /opt/homebrew/bin/code-server
-# Version tested: 4.112.0
-```
+Ask the agent any of these:
 
-## Usage
+- *"spin up code-server for this directory"*
+- *"open these files in a browser"*
+- *"show me what you created"*
+- *"launch VS Code in browser"*
+- *"browse this directory"*
+- *"open a file viewer"*
 
-Load this skill in OpenCode and ask the agent to:
-- "spin up code-server for this directory"
-- "open these files in a browser viewer"
-- "show me what you created"
-- "launch VS Code in browser"
+## Lifecycle
 
-The agent will start code-server, wait for it to be ready, and auto-open your browser.
+| Command | What it does |
+|---------|-------------|
+| Start | Launches on next free port, opens browser |
+| Status | Lists all running instances with health check |
+| Stop | `tmux kill-session -t cs-PORT` |
+| Cleanup | Kills all `cs-*` sessions at once |
+| Idle timeout | Auto-shuts down after 1 hour of no browser activity |
 
 ## Security
 
-- **Always** `--auth none` paired with `--bind-addr 127.0.0.1:PORT` (never `0.0.0.0`)
-- Local-only access — no network exposure
-- No extension installation, no settings.json changes, no workspace files
+Runs on `127.0.0.1` only — never `0.0.0.0`. No authentication required because it's local-only. No extensions installed, no settings modified, no workspace files created.
 
-## License
+## User settings
 
-MIT
+code-server reads your global settings from `~/.local/share/code-server/User/settings.json` — configure it once (theme, font, etc.) and every future instance picks it up automatically.
+
+## Credit
+
+Built on [code-server](https://github.com/coder/code-server) by [Coder](https://coder.com) — VS Code running on a remote server, accessible in the browser. This skill wraps it as a local ephemeral viewer managed via tmux.

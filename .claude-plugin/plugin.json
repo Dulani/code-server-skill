@@ -1,0 +1,9 @@
+{
+  "name": "code-server",
+  "version": "1.0.0",
+  "description": "Spin up code-server (VS Code in browser) as an ephemeral local file viewer for agent-generated artifacts. Auto port selection, healthz polling, browser auto-open, and idle timeout.",
+  "author": {
+    "name": "RAND AI Team"
+  },
+  "repository": "https://code.rand.org/skills/code-server"
+}
