@@ -40,25 +40,21 @@ brew install code-server
 
 ## Quick Start
 
-Open a directory in code-server with one block:
+Always launch code-server through the bundled script so it opens the active workspace,
+not whatever folder code-server last remembered.
 
 ```bash
-TARGET_DIR="$HOME/my-project"   # ← change this
-
-PORT=13337
-while lsof -i :$PORT &>/dev/null && [ $PORT -lt 13399 ]; do PORT=$((PORT + 1)); done
-SESSION="cs-$PORT"
-tmux new-session -d -s "$SESSION" \
-  "code-server --auth none --bind-addr 127.0.0.1:$PORT \
-   --disable-telemetry --disable-update-check \
-   --idle-timeout-seconds 3600 '$TARGET_DIR'"
-for i in $(seq 1 30); do
-  curl -sf "http://127.0.0.1:$PORT/healthz" &>/dev/null && break
-  sleep 1
-done
-open "http://127.0.0.1:$PORT"
-echo "Opened: http://127.0.0.1:$PORT  (session: $SESSION)"
+/Users/dwoods/skills/code-server/scripts/start-code-server.sh "$PWD"
 ```
+
+If the user asked to view a different directory, pass that absolute path instead.
+
+The launcher script intentionally does four things that the old ad-hoc command did not:
+
+1. Uses the requested directory (default: current working directory)
+2. Starts code-server with `--ignore-last-opened`
+3. Opens the browser with an explicit `?folder=...` URL so stale state cannot win
+4. Suppresses the repeated trust / getting-started friction for this viewer workflow
 
 ---
 
@@ -66,50 +62,25 @@ echo "Opened: http://127.0.0.1:$PORT  (session: $SESSION)"
 
 ### Start
 
-Full start recipe with port auto-selection, healthz polling, and browser auto-open:
+```bash
+/Users/dwoods/skills/code-server/scripts/start-code-server.sh "$PWD"
+```
+
+For a different directory:
 
 ```bash
-TARGET_DIR="/path/to/directory"   # ← set this to the directory to open
-
-# Find a free port in range 13337-13399
-PORT=13337
-while lsof -i :$PORT &>/dev/null && [ $PORT -lt 13399 ]; do
-  PORT=$((PORT + 1))
-done
-if lsof -i :$PORT &>/dev/null; then
-  echo "ERROR: No free ports in range 13337-13399" >&2
-  exit 1
-fi
-
-SESSION="cs-$PORT"
-
-# Start code-server in a detached tmux session
-tmux new-session -d -s "$SESSION" \
-  "code-server --auth none --bind-addr 127.0.0.1:$PORT \
-   --disable-telemetry --disable-update-check \
-   --idle-timeout-seconds 3600 '$TARGET_DIR'"
-
-# Poll healthz until ready (up to 30s)
-URL="http://127.0.0.1:$PORT"
-READY=0
-for i in $(seq 1 30); do
-  if curl -sf "$URL/healthz" &>/dev/null; then
-    READY=1
-    break
-  fi
-  sleep 1
-done
-
-if [ $READY -eq 0 ]; then
-  echo "ERROR: code-server did not start within 30s" >&2
-  tmux kill-session -t "$SESSION" 2>/dev/null
-  exit 1
-fi
-
-echo "code-server ready at $URL"
-echo "Session: $SESSION  |  Directory: $TARGET_DIR"
-open "$URL"
+/Users/dwoods/skills/code-server/scripts/start-code-server.sh "/absolute/path/to/directory"
 ```
+
+What the script does:
+
+- picks the next free port in `13337-13399`
+- starts `code-server` in detached tmux
+- passes `--disable-getting-started-override`
+- passes `--disable-workspace-trust` for this session
+- passes `--ignore-last-opened` so stale `coder.json` state cannot hijack the folder
+- writes `workbench.startupEditor = none` into code-server user settings to suppress the Welcome tab
+- opens the browser using `http://127.0.0.1:PORT/?folder=<encoded target>`
 
 > **Note**: First launch may take 10–20s as code-server downloads assets. Subsequent
 > starts on the same machine are faster.
@@ -188,8 +159,10 @@ echo "Cleanup complete. Remaining cs-* sessions: $REMAINING"
 | High memory (~600MB) | VS Code runtime | Expected; stop when done: `tmux kill-session -t cs-PORT` |
 | Zombie session (tmux alive, healthz fails) | code-server crashed inside tmux | Run cleanup recipe; `tmux attach -t cs-PORT` to see error |
 | Port in TIME_WAIT state | Recent stop, OS holding port | Wait 30–60s or use next port in range |
-| Browser didn't open | `open` command failed | Navigate manually to `http://127.0.0.1:PORT` |
+| Browser didn't open | `open` command failed | Copy the printed `Folder URL` into the browser manually |
 | No free ports in range | All 13337–13399 occupied | Stop old instances with cleanup recipe |
+| Wrong folder opens | Bare URL reused old state | Use the printed `Folder URL`, not just `http://127.0.0.1:PORT` |
+| Welcome tab still appears | Startup editor persisted from old config | Relaunch via the script; it writes `workbench.startupEditor: none` |
 
 ---
 
@@ -199,8 +172,9 @@ echo "Cleanup complete. Remaining cs-* sessions: $REMAINING"
 - **File tree**: Left sidebar shows the full directory structure
 - **Terminal**: `` Ctrl+` `` opens the integrated terminal
 - **Multiple directories**: Start separate instances — each gets its own port and tmux session
-- **URL format**: Always `http://127.0.0.1:PORT` — no password, no HTTPS needed
+- **URL format**: The server base is `http://127.0.0.1:PORT`, but for reliable folder selection use the printed `Folder URL`
 - **Idle shutdown**: Server auto-exits after 1 hour of no browser activity (`--idle-timeout-seconds 3600`)
+- **Important**: When opening from this skill, prefer the printed `Folder URL` because code-server gives query parameters higher priority than remembered state
 
 ---
 
