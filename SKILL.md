@@ -44,7 +44,7 @@ Always launch code-server through the bundled script so it opens the active work
 not whatever folder code-server last remembered.
 
 ```bash
-/Users/dwoods/skills/code-server/scripts/start-code-server.sh "$PWD"
+<path-to-skill>/code-server/scripts/start-code-server.sh "$PWD"
 ```
 
 If the user asked to view a different directory, pass that absolute path instead.
@@ -63,7 +63,13 @@ The launcher script intentionally does four things that the old ad-hoc command d
 ### Start
 
 ```bash
-/Users/dwoods/skills/code-server/scripts/start-code-server.sh "$PWD"
+<path-to-skill>/code-server/scripts/start-code-server.sh "$PWD"
+```
+
+For a different directory:
+
+```bash
+<path-to-skill>/code-server/scripts/start-code-server.sh "/absolute/path/to/directory"
 ```
 
 For a different directory:

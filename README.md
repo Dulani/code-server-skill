@@ -19,12 +19,12 @@ You get a full VS Code experience — file tree, syntax highlighting, live markd
 Use the bundled launcher instead of hand-writing the `code-server` command:
 
 ```bash
-/Users/dwoods/skills/code-server/scripts/start-code-server.sh "$PWD"
+<path-to-skill>/code-server/scripts/start-code-server.sh "$PWD"
 ```
 
 That script fixes three recurring annoyances:
 
-- opens the current workspace instead of stale `/Users/dwoods/code_server` state
+- opens the current workspace instead of stale code-server remembered state
 - disables one-session workspace trust prompts for this local viewer workflow
 - suppresses the Welcome tab by setting `workbench.startupEditor` to `none`
 
