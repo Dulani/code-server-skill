@@ -1,76 +1,33 @@
 # code-server Viewer Skill
 
-An OpenCode skill that spins up [code-server](https://github.com/coder/code-server) — VS Code running in your browser — so you can instantly browse agent-generated files without leaving your workflow.
+An OpenCode skill that spins up code-server — VS Code running in your browser — so you can instantly browse agent-generated files without leaving your workflow. The server runs locally on 127.0.0.1, requires no authentication, and automatically shuts down after one hour of idle time.
 
-## What it does
+## When Would I Use This?
 
-When an agent generates files (reports, code, HTML, data), you can ask it to "show me what you created" and it will:
+- **Viewing Generated Files**: An agent has created a report, code, or HTML output and you want to explore it visually with a full file tree, syntax highlighting, and live markdown preview. You ask the agent to "show me what you created" and it launches VS Code in your browser pointed at the working directory.
 
-1. Find a free local port (13337–13399)
-2. Start code-server in a background tmux session
-3. Ignore stale "last opened" state and force the requested folder
-4. Wait for it to be ready (healthz polling)
-5. Auto-open your browser to the exact folder URL
+- **Quick Code Review**: You need to browse through multiple files, search for specific patterns, or use VS Code's integrated terminal to run commands against the agent's output. The full IDE experience helps you understand the structure and content quickly.
 
-You get a full VS Code experience — file tree, syntax highlighting, live markdown preview, and an integrated terminal — pointed at whatever directory the agent was working in.
+- **Browsing Any Directory**: You want to open a local directory in a browser-based VS Code instance without installing VS Code locally or configuring remote servers. The skill finds a free port and launches instantly.
 
-## Recommended launcher
+## What You'll Need
 
-Use the bundled launcher instead of hand-writing the `code-server` command:
+- **macOS**: The skill uses macOS-specific commands for browser launching and port management.
+- **code-server**: Install via `brew install code-server`. The binary should be available at `/opt/homebrew/bin/code-server`.
+- **tmux**: Required for managing background code-server sessions.
 
-```bash
-<path-to-skill>/code-server/scripts/start-code-server.sh "$PWD"
-```
+## How to Invoke
 
-That script fixes three recurring annoyances:
+Say things like:
+> "spin up code-server for this directory"
+> "open these files in a browser"
+> "show me what you created"
+> "launch VS Code in browser"
+> "browse this directory"
 
-- opens the current workspace instead of stale code-server remembered state
-- disables one-session workspace trust prompts for this local viewer workflow
-- suppresses the Welcome tab by setting `workbench.startupEditor` to `none`
+## Related Skills
 
-## Requirements
+- **code-server**: This skill IS the code-server viewer — standalone, no strong related skills needed.
 
-- macOS
-- [code-server](https://github.com/coder/code-server) — `brew install code-server`
-- tmux
-
-## Trigger phrases
-
-Ask the agent any of these:
-
-- *"spin up code-server for this directory"*
-- *"open these files in a browser"*
-- *"show me what you created"*
-- *"launch VS Code in browser"*
-- *"browse this directory"*
-- *"open a file viewer"*
-
-## Lifecycle
-
-| Command | What it does |
-|---------|-------------|
-| Start | Launches on next free port, opens browser |
-| Status | Lists all running instances with health check |
-| Stop | `tmux kill-session -t cs-PORT` |
-| Cleanup | Kills all `cs-*` sessions at once |
-| Idle timeout | Auto-shuts down after 1 hour of no browser activity |
-
-## Security
-
-Runs on `127.0.0.1` only — never `0.0.0.0`. No authentication required because it's local-only. No extensions installed. The launcher does make one minimal user-setting change: it sets `workbench.startupEditor` to `none` in code-server's user settings so the Welcome tab stops reappearing.
-
-## User settings
-
-code-server reads your global settings from `~/.local/share/code-server/User/settings.json` — configure it once (theme, font, etc.) and every future instance picks it up automatically.
-
-The launcher preserves your existing settings and only ensures this one value:
-
-```json
-{
-  "workbench.startupEditor": "none"
-}
-```
-
-## Credit
-
-Built on [code-server](https://github.com/coder/code-server) by [Coder](https://coder.com) — VS Code running on a remote server, accessible in the browser. This skill wraps it as a local ephemeral viewer managed via tmux.
+---
+*For technical details and implementation guidance, see [SKILL.md](./SKILL.md).*
