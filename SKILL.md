@@ -1,5 +1,6 @@
 ---
 name: code-server
+version: "1.0.0"
 description: >
   Spin up code-server (VS Code in browser) to view agent-generated files.
   Use when asked to: "spin up code-server", "open in browser", "view these files",
