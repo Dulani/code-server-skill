@@ -12,9 +12,10 @@ An OpenCode skill that spins up code-server — VS Code running in your browser 
 
 ## What You'll Need
 
-- **macOS**: The skill uses macOS-specific commands for browser launching and port management.
-- **code-server**: Install via `brew install code-server`. The binary should be available at `/opt/homebrew/bin/code-server`.
+- **macOS or Linux**: Launch is cross-platform — on macOS the bundled launcher uses `open`, on Linux it falls back to `xdg-open` for browser launch.
+- **code-server**: macOS: `brew install code-server`. Linux: see [coder/code-server installation](https://github.com/coder/code-server#getting-started) (Arch: `yay -S code-server`; Fedora/RHEL: `sudo dnf install code-server`; Debian/Ubuntu: download the deb from coder/code-server releases).
 - **tmux**: Required for managing background code-server sessions.
+- **lsof**: Used to find the next free port in the 13337–13399 range.
 
 ## How to Invoke
 

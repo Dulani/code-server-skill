@@ -26,16 +26,27 @@ visually. A single `open` command launches the browser to the correct URL.
 ## Prerequisites
 
 ```bash
-# Check if code-server is installed
-which code-server || echo "NOT INSTALLED — run: brew install code-server"
+# Check if code-server and tmux are installed
+which code-server && which tmux && which lsof || echo "Dependencies missing. See install notes below."
 ```
 
 If not installed:
 ```bash
-brew install code-server
-# Binary will be at: /opt/homebrew/bin/code-server
-# Version tested: 4.112.0
+# macOS
+brew install code-server tmux lsof
+
+# Linux (Arch)
+yay -S code-server lsof      # code-server is in the AUR; tmux via: sudo pacman -S tmux
+
+# Linux (Fedora/RHEL)
+sudo dnf install code-server tmux
+
+# Linux (Debian/Ubuntu)
+sudo apt install code-server tmux   # or download the .deb from coder/code-server releases
 ```
+
+> Browser launch is cross-platform: the launcher script uses `open` on macOS and
+> falls back to `xdg-open` on Linux.
 
 ---
 

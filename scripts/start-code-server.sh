@@ -6,12 +6,17 @@ START_PORT="${CODE_SERVER_START_PORT:-13337}"
 END_PORT="${CODE_SERVER_END_PORT:-13399}"
 
 if ! command -v code-server >/dev/null 2>&1; then
-  echo "ERROR: code-server is not installed. Run: brew install code-server" >&2
+  echo "ERROR: code-server is not installed. macOS: brew install code-server; Arch: yay -S code-server" >&2
   exit 1
 fi
 
 if ! command -v tmux >/dev/null 2>&1; then
   echo "ERROR: tmux is not installed." >&2
+  exit 1
+fi
+
+if ! command -v lsof >/dev/null 2>&1; then
+  echo "ERROR: lsof is not installed (needed to find a free port)." >&2
   exit 1
 fi
 
@@ -97,7 +102,13 @@ if [[ "$READY" -ne 1 ]]; then
   exit 1
 fi
 
-open "$FOLDER_URL"
+# Launch the browser cross-platform (macOS: open, Linux: xdg-open)
+# Fall back to just printing the URL if no browser launcher exists.
+if command -v xdg-open >/dev/null 2>&1; then
+  xdg-open "$FOLDER_URL" >/dev/null 2>&1 &
+elif command -v open >/dev/null 2>&1; then
+  open "$FOLDER_URL"
+fi
 
 echo "code-server ready at $URL"
 echo "Folder URL: $FOLDER_URL"
