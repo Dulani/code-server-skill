@@ -98,6 +98,7 @@ What the script does:
 - passes `--disable-workspace-trust` for this session
 - passes `--ignore-last-opened` so stale `coder.json` state cannot hijack the folder
 - writes `workbench.startupEditor = none` into code-server user settings to suppress the Welcome tab
+- defaults `workbench.colorTheme = "Dark 2026"` (dark mode) when no theme is already set, so every invocation is consistent across machines
 - opens the browser using `http://127.0.0.1:PORT/?folder=<encoded target>`
 
 > **Note**: First launch may take 10–20s as code-server downloads assets. Subsequent

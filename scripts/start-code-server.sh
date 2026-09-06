@@ -52,6 +52,10 @@ if os.path.exists(path):
         data = {}
 
 data["workbench.startupEditor"] = "none"
+# Default to a dark theme so every invocation (and every machine) looks consistent.
+# Keep "Dark 2026" unless a user overrides it after launch.
+if "workbench.colorTheme" not in data:
+    data["workbench.colorTheme"] = "Dark 2026"
 
 with open(path, "w", encoding="utf-8") as f:
     json.dump(data, f, indent=2)
